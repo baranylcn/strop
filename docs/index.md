@@ -39,8 +39,9 @@ diff between your original prompt and the final one.
 
 ## Try it
 
-The repository includes two runnable examples, `examples/ticket_routing` (labeled classification)
-and `examples/support_replies` (rules, a custom metric, and judge rubrics). Clone the
+The repository includes three runnable examples, `examples/ticket_routing` (labeled
+classification), `examples/support_replies` (rules, a custom metric, and judge rubrics), and
+`examples/extract_order_details` (JSON extraction with a schema and field-level metrics). Clone the
 [repository](https://github.com/baranylcn/strop) to get them, then follow the README in each
 folder.
 

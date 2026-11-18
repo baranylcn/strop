@@ -1,0 +1,9 @@
+messages:
+  - role: system
+    content: |-
+      Read the customer email and write down the order details as JSON.
+  - role: user
+    content: |-
+      Email: {{email}}
+optimize:
+  - system
