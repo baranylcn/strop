@@ -2,6 +2,7 @@
 
 from collections.abc import Callable, Mapping
 from dataclasses import dataclass, field
+from difflib import get_close_matches
 
 from strop.config.metrics import RuleSpec
 from strop.errors import ConfigError
@@ -112,4 +113,21 @@ def build_metric(name: str, context: MetricContext) -> Metric:
     prefix, separator, argument = name.partition(":")
     if separator and argument and prefix in _PARAMETERIZED:
         return _PARAMETERIZED[prefix](argument, context)
-    raise ConfigError(f"unknown metric '{name}'; available: {', '.join(known_metric_names())}")
+    raise ConfigError(_unknown_metric_message(name, prefix, separator, argument))
+
+
+def _suggestion(name: str, prefix: str, separator: str, argument: str) -> str | None:
+    """The closest valid metric name to ``name``, or None when nothing is close."""
+    if separator and argument:
+        close = get_close_matches(prefix, _PARAMETERIZED, n=1)
+        return f"{close[0]}:{argument}" if close else None
+    close = get_close_matches(name, _SIMPLE, n=1)
+    return close[0] if close else None
+
+
+def _unknown_metric_message(name: str, prefix: str, separator: str, argument: str) -> str:
+    available = ", ".join(known_metric_names())
+    suggestion = _suggestion(name, prefix, separator, argument)
+    if suggestion is None:
+        return f"unknown metric '{name}'; available: {available}"
+    return f"unknown metric '{name}'. Did you mean '{suggestion}'? Available: {available}"
