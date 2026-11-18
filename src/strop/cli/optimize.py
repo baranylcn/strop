@@ -8,6 +8,7 @@ import typer
 
 from strop.cli.evaluate import NoCacheOption
 from strop.cli.options import DirOption, JsonOption, emit_json
+from strop.cli.style import echo_good, echo_narration
 from strop.config.enums import ApprovalMode
 from strop.config.overrides import apply_overrides
 from strop.errors import ConfigError, ExitCode
@@ -73,7 +74,7 @@ def optimize_command(
     )
 
     def say(line: str) -> None:
-        typer.echo(line, err=as_json)
+        echo_narration(line, err=as_json)
 
     with project.database() as conn:
         try:
@@ -111,7 +112,7 @@ def approve_command(
     project = open_project(directory)
     with project.database() as conn:
         candidate = approve(conn, version)
-    typer.echo(f"v{candidate.version_number} is now the best prompt.")
+    echo_good(f"v{candidate.version_number} is now the best prompt.")
     typer.echo("Continue with 'strop optimize --resume'.")
 
 

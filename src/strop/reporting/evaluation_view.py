@@ -10,6 +10,7 @@ from rich.text import Text
 
 from strop.evaluation.models import EvaluationRecord, ExampleOutcome, UsageSummary
 from strop.formatting import fmt, shorten
+from strop.reporting.theme import f1_style
 
 
 def render_evaluation(
@@ -25,35 +26,47 @@ def render_evaluation(
         f"Evaluation {record.id}: {version_ref} on {record.partition.value} "
         f"({record.sample_count} examples, {record.kind})"
     )
-    console.print(Text(title, style="bold"), soft_wrap=True)
+    console.print(Text(title, style="title"), soft_wrap=True)
     console.print(_metrics_table(record))
     console.print(_error_summary(outcomes), soft_wrap=True)
     classes = _per_class_table(record)
     if classes is not None:
         console.print(classes)
     console.print(Text(usage_line(record.usage), style="dim"), soft_wrap=True)
-    for line in failure_lines(outcomes, show_errors):
-        console.print(line, soft_wrap=True, markup=False)
+    for index, line in enumerate(failure_lines(outcomes, show_errors)):
+        style = "warn" if index == 0 else ("bad" if "provider_error" in line else "")
+        console.print(Text(line, style=style), soft_wrap=True)
 
 
 def _metrics_table(record: EvaluationRecord) -> Table:
-    table = Table(box=None, pad_edge=False, header_style="bold")
+    table = Table(box=None, pad_edge=False, header_style="label")
     for column in ("Metric", "Value", "Samples", "Note"):
         table.add_column(column)
     for name, metric in record.report.values.items():
-        label = f"{name} (primary)" if name == record.report.primary else name
-        note = "subjective, LLM-judged" if metric.subjective else ""
-        table.add_row(label, fmt(metric.value), str(metric.samples), note)
+        primary = name == record.report.primary
+        label = Text(f"{name} (primary)" if primary else name, style="info" if primary else "")
+        value = Text(fmt(metric.value), style=_value_style(name, metric.value, primary))
+        note = Text("subjective, LLM-judged" if metric.subjective else "", style="warn")
+        table.add_row(label, value, str(metric.samples), note)
     return table
 
 
-def _error_summary(outcomes: Sequence[ExampleOutcome]) -> str:
+def _value_style(name: str, value: float | None, primary: bool) -> str:
+    """Only a short valid output rate is flagged; other values are shown without a verdict."""
+    if name == "valid_output_rate" and value is not None and value < 1.0:
+        return "warn"
+    return "title" if primary else ""
+
+
+def _error_summary(outcomes: Sequence[ExampleOutcome]) -> Text:
     codes = Counter(o.error for o in outcomes if o.error)
     wrong = sum(1 for o in outcomes if _is_wrong(o))
     parts = [f"{code} {count}" for code, count in sorted(codes.items())]
     if wrong:
         parts.append(f"valid but wrong {wrong}")
-    return f"Output problems: {', '.join(parts)}" if parts else "No output problems."
+    if not parts:
+        return Text("No output problems.", style="ok")
+    return Text(f"Output problems: {', '.join(parts)}", style="bad")
 
 
 def _is_wrong(outcome: ExampleOutcome) -> bool:
@@ -69,7 +82,7 @@ def _per_class_table(record: EvaluationRecord) -> Table | None:
     if not per_class:
         return None
     table = Table(
-        box=None, pad_edge=False, header_style="bold", title="Per class", title_justify="left"
+        box=None, pad_edge=False, header_style="label", title="Per class", title_justify="left"
     )
     for column in ("Class", "Precision", "Recall", "F1", "Support"):
         table.add_column(column)
@@ -78,7 +91,7 @@ def _per_class_table(record: EvaluationRecord) -> Table | None:
             label,
             fmt(scores["precision"]),
             fmt(scores["recall"]),
-            fmt(scores["f1"]),
+            Text(fmt(scores["f1"]), style=f1_style(scores["f1"])),
             str(scores["support"]),
         )
     return table

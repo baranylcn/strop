@@ -9,6 +9,7 @@ from rich.text import Text
 from strop.formatting import fmt, shorten
 from strop.prompts.diff import diff_templates
 from strop.reporting.diff_view import render_diff
+from strop.reporting.theme import delta_style, status_text
 from strop.services.optimize import RunSummary
 from strop.storage.runs import CandidateRecord
 
@@ -35,22 +36,18 @@ def stop_text(summary: RunSummary) -> str:
 
 def render_run(console: Console, summary: RunSummary) -> None:
     """Print the run result: why it stopped, the metric change, candidates, and the prompt diff."""
+    paused = summary.pending is not None
     console.print(
-        Text(f"Run {summary.run.id}: {stop_text(summary)}.", style="bold"), soft_wrap=True
+        Text(f"Run {summary.run.id}: {stop_text(summary)}.", style="warn" if paused else "title"),
+        soft_wrap=True,
     )
-    primary = _primary(summary)
-    before, after = _value(summary.baseline), _value(summary.result)
-    change = (
-        f"{summary.start.ref} {primary} {fmt(before)}  ->  "
-        f"{summary.final.ref} {primary} {fmt(after)} (validation)"
-    )
-    console.print(change, soft_wrap=True, highlight=False)
+    console.print(_change_line(summary), soft_wrap=True)
     if summary.candidates:
         console.print(_candidate_table(summary.candidates))
     cost = "unavailable" if summary.cost_usd is None else f"${summary.cost_usd:.4f}"
     console.print(Text(f"Model calls: {summary.calls} | Cost: {cost}", style="dim"), soft_wrap=True)
     for warning in summary.warnings:
-        console.print(f"Warning: {warning}", soft_wrap=True, markup=False, highlight=False)
+        console.print(Text(f"Warning: {warning}", style="warn"), soft_wrap=True)
     _render_final_diff(console, summary)
 
 
@@ -58,26 +55,44 @@ def _render_final_diff(console: Console, summary: RunSummary) -> None:
     if summary.pending is not None:
         return
     if summary.final.number == summary.initial.number:
-        console.print("No improvement was accepted; the best prompt is unchanged.", soft_wrap=True)
+        message = Text("No improvement was accepted; the best prompt is unchanged.", style="warn")
+        console.print(message, soft_wrap=True)
         return
     diff = diff_templates(summary.initial.template, summary.final.template)
     console.print(
-        Text(f"Prompt changes, {summary.initial.ref} -> {summary.final.ref}:", style="bold"),
+        Text(f"Prompt changes, {summary.initial.ref} -> {summary.final.ref}:", style="title"),
         soft_wrap=True,
     )
     render_diff(diff, console)
 
 
+def _change_line(summary: RunSummary) -> Text:
+    primary = _primary(summary)
+    before, after = _value(summary.baseline), _value(summary.result)
+    line = Text(f"{summary.start.ref} {primary} {fmt(before)}  ->  ")
+    line.append(f"{summary.final.ref} {primary} {fmt(after)}", style=_outcome_style(before, after))
+    line.append(" (validation)")
+    return line
+
+
+def _outcome_style(before: float | None, after: float | None) -> str:
+    if before is None or after is None:
+        return "title"
+    return delta_style(after - before) if after != before else "title"
+
+
 def _candidate_table(candidates: list[CandidateRecord]) -> Table:
-    table = Table(box=None, pad_edge=False, header_style="bold")
+    table = Table(box=None, pad_edge=False, header_style="label")
     for column in ("Turn", "Version", "Result", "Change", "Summary"):
         table.add_column(column)
     for item in candidates:
-        delta = "-" if item.primary_delta is None else f"{item.primary_delta:+.4f}"
+        delta = Text("-", style="muted")
+        if item.primary_delta is not None:
+            delta = Text(f"{item.primary_delta:+.4f}", style=delta_style(item.primary_delta))
         version = f"v{item.version_number}" if item.version_number else "-"
         explained = item.status in {"invalid", "rejected"}
         note = (item.reason or item.change_summary) if explained else item.change_summary
-        table.add_row(str(item.turn), version, item.status, delta, shorten(note, 60))
+        table.add_row(str(item.turn), version, status_text(item.status), delta, shorten(note, 60))
     return table
 
 

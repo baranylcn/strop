@@ -7,6 +7,7 @@ import typer
 from pydantic import ValidationError
 
 from strop.cli.options import DirOption
+from strop.cli.style import echo_good, echo_note
 from strop.config import DatasetFormat, OutputType, StropConfig
 from strop.config.constraints import parse_constraints
 from strop.config.io import format_errors
@@ -94,9 +95,9 @@ def init_command(
     }
     config = _validate(raw)
     for entry in scaffold_project(config, directory, force=force):
-        typer.echo(f"Created {entry}")
-    typer.echo(f"Note: dataset rows will be sent to: {', '.join(data_recipients(config))}")
-    typer.echo("Note: keep .strop/ and .env out of version control; they hold outputs and keys.")
+        echo_good(f"Created {entry}")
+    echo_note(f"dataset rows will be sent to: {', '.join(data_recipients(config))}")
+    echo_note("keep .strop/ and .env out of version control; they hold outputs and keys.")
 
 
 def _column_roles(inputs: list[str], expected: str | None, metadata: list[str]) -> dict[str, str]:

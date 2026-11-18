@@ -15,6 +15,7 @@ from strop.cli.init import init_command
 from strop.cli.optimize import approve_command, optimize_command, reject_command
 from strop.cli.prompts import prompt_app
 from strop.cli.status import status_command
+from strop.cli.style import echo_error, echo_warn
 from strop.cli.versions import diff_command, history_command, rollback_command
 from strop.errors import ExitCode, StropError
 from strop.log import configure_logging
@@ -75,8 +76,8 @@ def main() -> None:
     try:
         app()
     except StropError as exc:
-        typer.echo(f"error: {exc}", err=True)
+        echo_error(str(exc))
         sys.exit(exc.exit_code)
     except KeyboardInterrupt:
-        typer.echo("interrupted", err=True)
+        echo_warn("interrupted", err=True)
         sys.exit(ExitCode.INTERRUPTED)
