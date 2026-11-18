@@ -40,6 +40,8 @@ strop --version
 
 The package is called `strop-cli` on PyPI because the name `strop` is reserved there. The command it installs is `strop`. To keep Strop out of your other Python environments, install it with `pipx install strop-cli` instead. To work on Strop itself, see [Development](#development).
 
+Shell completion for the `strop` command is available for bash, zsh, fish, and PowerShell. Run `strop --show-completion` to print the script, or `strop --install-completion` to add it to your shell configuration file. Strop changes that file only when you run `--install-completion`.
+
 Strop calls models through [LiteLLM](https://docs.litellm.ai/docs/providers), so you can use any provider and model it supports. Set the API key your provider expects as an environment variable, or put it in a `.env` file in your project directory. Strop has no default model; you name every model yourself.
 
 ## Quick start
