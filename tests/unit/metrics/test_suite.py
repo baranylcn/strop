@@ -26,6 +26,23 @@ def test_unknown_metric_lists_the_available_names() -> None:
         build_metric("f2", CONTEXT)
 
 
+def test_misspelled_metric_suggests_the_closest_name() -> None:
+    with pytest.raises(ConfigError, match=r"Did you mean 'macro_f1'\?.*Available: .*accuracy"):
+        build_metric("macro_f2", CONTEXT)
+
+
+def test_misspelled_parameterized_prefix_suggests_the_valid_prefix() -> None:
+    with pytest.raises(ConfigError, match=r"Did you mean 'recall:refund'\?"):
+        build_metric("recal:refund", CONTEXT)
+
+
+def test_a_name_that_is_close_to_nothing_gets_no_suggestion() -> None:
+    with pytest.raises(ConfigError) as error:
+        build_metric("zzzzzz", CONTEXT)
+    assert "Did you mean" not in str(error.value)
+    assert "available: accuracy" in str(error.value)
+
+
 def test_unknown_label_is_rejected() -> None:
     with pytest.raises(ConfigError, match="unknown label"):
         build_metric("recall:z", CONTEXT)
