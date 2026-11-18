@@ -35,6 +35,45 @@ def test_check_json_output(run_cli: CliRunner, project: Path) -> None:
     assert payload["issues"] == [{"row": 2, "message": "input column 'message' is empty"}]
 
 
+def test_check_shows_the_label_counts_largest_first(run_cli: CliRunner, project: Path) -> None:
+    lines = ["message,category"] + [f"m{i},{'refund' if i < 70 else 'billing'}" for i in range(100)]
+    (project / "data.csv").write_text("\n".join(lines) + "\n", encoding="utf-8")
+    _, out, _ = run_cli("data", "check", "--dir", str(project))
+    assert "Labels: refund 70, billing 30" in out
+
+
+def test_check_orders_equal_label_counts_by_name(run_cli: CliRunner, project: Path) -> None:
+    _, out, _ = run_cli("data", "check", "--dir", str(project))
+    assert "Labels: billing 50, refund 50" in out
+
+
+def test_check_counts_only_valid_rows(run_cli: CliRunner, project: Path) -> None:
+    write_dataset(project, bad_row=True)
+    _, out, _ = run_cli("data", "check", "--dir", str(project), "--skip-invalid")
+    assert "Labels: billing 50, refund 49" in out
+
+
+def test_check_json_has_label_counts(run_cli: CliRunner, project: Path) -> None:
+    _, out, _ = run_cli("data", "check", "--dir", str(project), "--json")
+    payload = json.loads(out)
+    assert payload["label_counts"] == {"billing": 50, "refund": 50}
+    assert list(payload["label_counts"]) == ["billing", "refund"]
+
+
+def test_check_has_no_label_counts_without_an_expected_column(
+    run_cli: CliRunner, project: Path
+) -> None:
+    config = project / "strop.yaml"
+    config.write_text(
+        config.read_text(encoding="utf-8").replace("category: expected", "category: ignore"),
+        encoding="utf-8",
+    )
+    _, out, _ = run_cli("data", "check", "--dir", str(project))
+    assert "Labels:" not in out
+    _, out, _ = run_cli("data", "check", "--dir", str(project), "--json")
+    assert "label_counts" not in json.loads(out)
+
+
 def test_split_creates_then_reuses(run_cli: CliRunner, project: Path) -> None:
     args = ("data", "split", "--dir", str(project))
     code, out, _ = run_cli(*args)

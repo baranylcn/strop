@@ -33,6 +33,7 @@ def test_ticket_routing_example(run_cli: CliRunner, tmp_path: Path) -> None:
     code, out, _ = run_cli("data", "check", "--dir", str(project))
     assert code == 0
     assert "Records: 150, valid: 150, invalid: 0" in out
+    assert "Labels: billing 30, exchange 30, other 30, refund 30, technical 30" in out
     code, out, _ = run_cli("data", "split", "--dir", str(project))
     assert code == 0
     assert "train      90" in out

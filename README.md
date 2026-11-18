@@ -67,6 +67,7 @@ $ strop data check
 Dataset: data.csv
 Records: 150, valid: 150, invalid: 0
 Columns: ticket_id, customer_message, category, channel
+Labels: billing 30, exchange 30, other 30, refund 30, technical 30
 
 $ strop data split
 Created split 1 (seed 42) over 150 rows:
