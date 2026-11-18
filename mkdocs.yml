@@ -30,6 +30,7 @@ nav:
   - How it works: how-it-works.md
   - Configuration: configuration.md
   - Metrics: metrics.md
+  - Troubleshooting: troubleshooting.md
 
 markdown_extensions:
   - admonition
