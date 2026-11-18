@@ -82,3 +82,9 @@ there is no unfinished run to resume; start one with 'strop optimize'
 
 The current project has no resumable run. Check that you are in the intended project. If you
 want a new run, start it with `strop optimize`.
+
+## I do not want colors or the banner
+
+Color and the STROP banner appear only in a terminal. Set `NO_COLOR=1` to turn color off, and
+`STROP_NO_BANNER=1` to hide the banner. Output that is piped to a file or another program, and
+`--json` output, never contains either.

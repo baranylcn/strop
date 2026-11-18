@@ -11,6 +11,17 @@ commands or the `strop.yaml` format.
 
 - A documentation site at https://baranylcn.github.io/strop/, built with MkDocs Material and
   published from `docs/` to GitHub Pages.
+- Colored terminal output: metrics, per-class scores, candidate statuses, score changes,
+  warnings, and errors. A progress bar replaces the plain counter while model calls run.
+- A STROP banner when you run `strop` without arguments or `strop init` in a terminal. Set
+  `STROP_NO_BANNER=1` to hide it.
+
+Color and the banner appear only in a terminal. Piped output, `--json`, and `NO_COLOR` stay plain.
+
+### Fixed
+
+- The data-recipient note in `strop init` names providers, and says so when a model name has no
+  provider prefix. An unknown model id gets a hint to use the exact id from the provider.
 
 ## [0.1.1] - 2026-11-18
 
