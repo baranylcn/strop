@@ -14,6 +14,13 @@ def test_version_flag(run_cli: CliRunner) -> None:
     assert out.strip() == f"strop {__version__}"
 
 
+def test_help_lists_the_shell_completion_options(run_cli: CliRunner) -> None:
+    code, out, _ = run_cli("--help")
+    assert code == 0
+    assert "--install-completion" in out
+    assert "--show-completion" in out
+
+
 def test_no_arguments_shows_help(run_cli: CliRunner) -> None:
     _, out, err = run_cli()
     assert "init" in out + err

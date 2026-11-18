@@ -28,7 +28,7 @@ app = typer.Typer(
     name="strop",
     help="Improve LLM prompts by testing them against your own data.",
     no_args_is_help=True,
-    add_completion=False,
+    add_completion=True,
     pretty_exceptions_enable=False,
     epilog=EXIT_CODES_HELP,
 )
