@@ -113,3 +113,17 @@ def test_compare_fails_when_no_model_works(
     code, _, err = run_cli("compare", "--dir", str(project), "--models", "a/x,b/y")
     assert code == 1
     assert "no model could be evaluated" in err
+
+
+def test_an_unknown_model_name_gets_a_specific_hint(
+    run_cli: CliRunner, project: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    def not_found(request: LLMRequest) -> str:
+        raise LLMError('NotFoundError: {"type":"not_found_error","message":"model: claude-x.5"}')
+
+    install(monkeypatch, MockLLMClient(not_found))
+    assert run_cli("data", "split", "--dir", str(project))[0] == 0
+    code, _, err = run_cli("baseline", "--dir", str(project))
+    assert code == 1
+    assert "does not know this model name" in err
+    assert "exact id from its model list" in err

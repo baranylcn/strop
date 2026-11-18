@@ -94,3 +94,12 @@ def test_init_rejects_invalid_values(
     code, _, err = run_cli(*init_args, flag, value)
     assert code == 2
     assert message in err
+
+
+def test_init_marks_unprefixed_model_names_instead_of_calling_them_providers(
+    run_cli: CliRunner, init_args: list[str]
+) -> None:
+    init_args[init_args.index("openai/model-a")] = "plain-model"
+    _, out, _ = run_cli(*init_args)
+    assert "plain-model (provider inferred by LiteLLM; write <provider>/plain-model" in out
+    assert "anthropic" in out

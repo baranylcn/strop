@@ -139,10 +139,16 @@ class Evaluator:
 def _require_some_answers(outcomes: Sequence[ExampleOutcome]) -> None:
     """An evaluation where every call failed measures nothing, so it is an error, not a score."""
     if outcomes and all(o.error == ErrorCode.PROVIDER_ERROR for o in outcomes):
+        first = outcomes[0].detail or ""
+        hint = (
+            " The provider does not know this model name; use the exact id from its model list."
+            if "NotFound" in first or "not_found" in first
+            else ""
+        )
         raise LLMError(
             f"every model call failed ({len(outcomes)} of {len(outcomes)}); first error: "
             f"{(outcomes[0].detail or 'unknown').rstrip('.')}. Check the model name, the API key, "
-            "the API base, and your network connection."
+            f"the API base, and your network connection.{hint}"
         )
 
 

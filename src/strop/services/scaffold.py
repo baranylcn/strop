@@ -55,7 +55,14 @@ def data_recipients(config: StropConfig) -> list[str]:
     """Provider names that will receive dataset content, from the configured models."""
     models = config.models
     specs = (models.target, models.optimizer, models.analyzer, models.judge)
-    return sorted({spec.model.split("/", 1)[0] for spec in specs if spec is not None})
+    return sorted({_provider(spec.model) for spec in specs if spec is not None})
+
+
+def _provider(model: str) -> str:
+    """The provider part of ``<provider>/<model>``, or a note when the name has no prefix."""
+    if "/" in model:
+        return model.split("/", 1)[0]
+    return f"{model} (provider inferred by LiteLLM; write <provider>/{model} to be explicit)"
 
 
 def starter_prompt(config: StropConfig) -> str:
