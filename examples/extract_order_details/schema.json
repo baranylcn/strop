@@ -1,0 +1,12 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "order_id": { "type": "string" },
+    "item": { "type": "string" },
+    "quantity": { "type": "integer", "minimum": 1 },
+    "express": { "type": "boolean" }
+  },
+  "required": ["order_id", "item", "quantity", "express"],
+  "additionalProperties": false
+}

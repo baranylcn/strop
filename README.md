@@ -44,7 +44,7 @@ Strop calls models through [LiteLLM](https://docs.litellm.ai/docs/providers), so
 
 ## Quick start
 
-The [repository](https://github.com/baranylcn/strop) includes a ready-to-run example in `examples/ticket_routing`: 150 synthetic support tickets in five categories, with a deliberately vague starting prompt. Clone the repository to get it.
+The [repository](https://github.com/baranylcn/strop) includes a ready-to-run example in `examples/ticket_routing`: 150 synthetic support tickets in five categories, with a deliberately vague starting prompt. Clone the repository to get it. Two more examples sit next to it: `examples/support_replies` (a text task scored with rules, a custom metric, and judge rubrics) and `examples/extract_order_details` (JSON extraction with a schema and field-level metrics).
 
 ```bash
 cd examples/ticket_routing

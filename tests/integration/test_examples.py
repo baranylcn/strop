@@ -40,6 +40,28 @@ def test_ticket_routing_example(run_cli: CliRunner, tmp_path: Path) -> None:
     assert "Warning" not in out
 
 
+def test_extract_order_details_example(run_cli: CliRunner, tmp_path: Path) -> None:
+    project = copy_example("extract_order_details", tmp_path)
+    code, _, err = run_cli(
+        "init", "--dir", str(project), "--name", "extract-order-details",
+        "--task", "Extract the order details from a customer email",
+        "--prompt", "prompt.yaml", "--data", "data.jsonl", "--id-column", "email_id",
+        "--input", "email", "--expected", "expected",
+        "--output-type", "json", "--output-schema", "schema.json",
+        "--metric", "field_f1", "--secondary-metric", "field_accuracy",
+        "--constraint", "schema_valid>=0.9",
+        "--target-model", "openai/example", "--optimizer-model", "anthropic/example",
+    )  # fmt: skip
+    assert code == 0, err
+    code, out, _ = run_cli("data", "check", "--dir", str(project))
+    assert code == 0
+    assert "Records: 60, valid: 60, invalid: 0" in out
+    code, out, _ = run_cli("data", "split", "--dir", str(project))
+    assert code == 0
+    assert "train      36" in out
+    assert "validation 12" in out
+
+
 def test_support_replies_example(run_cli: CliRunner, tmp_path: Path) -> None:
     project = copy_example("support_replies", tmp_path)
     code, _, err = run_cli(
