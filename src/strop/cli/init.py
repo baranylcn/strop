@@ -13,6 +13,8 @@ from strop.config.constraints import parse_constraints
 from strop.config.io import format_errors
 from strop.config.rules import load_rubrics, parse_rules
 from strop.errors import ConfigError
+from strop.reporting import ColorMode, make_console
+from strop.reporting.banner import show_banner
 from strop.services.scaffold import data_recipients, scaffold_project
 
 Option = typer.Option
@@ -66,6 +68,7 @@ def init_command(
     force: Annotated[bool, Option(help="Overwrite an existing strop.yaml.")] = False,
 ) -> None:
     """Create strop.yaml, a starter prompt, and the local .strop/ state directory."""
+    show_banner(make_console(ColorMode.AUTO))
     raw = {
         "project": {"name": name, "task_description": task},
         "prompt": {"file": str(prompt)},

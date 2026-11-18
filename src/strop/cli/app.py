@@ -19,6 +19,8 @@ from strop.cli.style import echo_error, echo_warn
 from strop.cli.versions import diff_command, history_command, rollback_command
 from strop.errors import ExitCode, StropError
 from strop.log import configure_logging
+from strop.reporting import ColorMode, make_console
+from strop.reporting.banner import show_banner, started_without_arguments
 
 EXIT_CODES_HELP = (
     "Exit codes: 0 success, 1 failure, 2 usage or configuration error, "
@@ -74,6 +76,8 @@ def _root(
 def main() -> None:
     """Run the CLI and translate expected errors into exit codes."""
     try:
+        if started_without_arguments():
+            show_banner(make_console(ColorMode.AUTO))
         app()
     except StropError as exc:
         echo_error(str(exc))
