@@ -1,5 +1,13 @@
 # Strop
 
+```text
+  ____ _____ ____   ___  ____
+ / ___|_   _|  _ \ / _ \|  _ \
+ \___ \ | | | |_) | | | | |_) |
+  ___) || | |  _ <| |_| |  __/
+ |____/ |_| |_| \_\\___/|_|
+```
+
 [![PyPI](https://img.shields.io/pypi/v/strop-cli)](https://pypi.org/project/strop-cli/)
 [![Python versions](https://img.shields.io/pypi/pyversions/strop-cli)](https://pypi.org/project/strop-cli/)
 [![CI](https://github.com/baranylcn/strop/actions/workflows/ci.yml/badge.svg)](https://github.com/baranylcn/strop/actions/workflows/ci.yml)
