@@ -28,6 +28,14 @@ def test_csv_handles_quoted_newlines_and_bom(tmp_path: Path) -> None:
     assert records[0].values["a"] == "line one\nline two"
 
 
+def test_csv_records_skip_blank_lines(tmp_path: Path) -> None:
+    path = write(tmp_path / "d.csv", "a,b\n1,2\n\n3,4\n\n")
+    _, records = read_records(path, DatasetFormat.CSV)
+    assert [r.values for r in records] == [{"a": "1", "b": "2"}, {"a": "3", "b": "4"}]
+    assert [r.number for r in records] == [1, 2]
+    assert all(r.error is None for r in records)
+
+
 def test_csv_row_with_wrong_field_count_is_an_error_record(tmp_path: Path) -> None:
     path = write(tmp_path / "d.csv", "a,b\n1,2\n3\n")
     _, records = read_records(path, DatasetFormat.CSV)

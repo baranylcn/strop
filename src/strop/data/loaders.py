@@ -50,7 +50,10 @@ def _read_csv(path: Path) -> tuple[tuple[str, ...], list[RawRecord]]:
         columns = tuple(name.strip() for name in header)
         if len(set(columns)) != len(columns):
             raise DataError(f"{path.name} has duplicate column names in its header")
-        records = [_csv_record(number, columns, cells) for number, cells in enumerate(reader, 1)]
+        # csv.reader yields an empty list for a blank line, such as a trailing newline at the
+        # end of the file. Skip those the way JSONL does instead of reporting a bad row.
+        filled = (cells for cells in reader if cells)
+        records = [_csv_record(number, columns, cells) for number, cells in enumerate(filled, 1)]
     return columns, records
 
 

@@ -22,6 +22,9 @@ Color and the banner appear only in a terminal. Piped output, `--json`, and `NO_
 
 - The data-recipient note in `strop init` names providers, and says so when a model name has no
   provider prefix. An unknown model id gets a hint to use the exact id from the provider.
+- A blank line in a CSV dataset, such as an extra newline at the end of the file, is now skipped,
+  as it already is in JSONL. Before, it was reported as an invalid row with 0 fields, so
+  `strop data check` and the commands that load the dataset failed unless `--skip-invalid` was set.
 
 ## [0.1.1] - 2026-11-18
 
