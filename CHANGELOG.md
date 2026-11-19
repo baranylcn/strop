@@ -7,6 +7,8 @@ commands or the `strop.yaml` format.
 
 ## [Unreleased]
 
+## [0.1.2] - 2026-11-19
+
 ### Added
 
 - A documentation site at https://baranylcn.github.io/strop/, built with MkDocs Material and
