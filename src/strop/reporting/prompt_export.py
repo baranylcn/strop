@@ -3,7 +3,7 @@
 import json
 from enum import StrEnum
 
-from strop.prompts import dump_prompt
+from strop.prompts import PromptTemplate, dump_prompt
 from strop.prompts.versions import PromptVersion
 
 
@@ -14,19 +14,26 @@ class PromptFormat(StrEnum):
     YAML = "yaml"
 
 
-def render_prompt(version: PromptVersion, fmt: PromptFormat) -> str:
-    """The prompt messages exactly as stored, in the requested format."""
+def render_prompt(version: PromptVersion, fmt: PromptFormat, *, keep_markers: bool = False) -> str:
+    """The prompt messages in the requested format.
+
+    ``<strop:fixed>`` markers only matter to Strop, so they are removed unless ``keep_markers``
+    is set; the text inside them stays. Keep them when the file will be optimized again.
+    """
+    template = version.template if keep_markers else version.template.without_markers()
     if fmt is PromptFormat.YAML:
-        return dump_prompt(version.template)
+        return dump_prompt(template)
     if fmt is PromptFormat.JSON:
-        return json.dumps(prompt_payload(version), indent=2, ensure_ascii=False) + "\n"
+        return json.dumps(prompt_payload(version, template), indent=2, ensure_ascii=False) + "\n"
     if fmt is PromptFormat.TXT:
-        return "\n\n".join(f"[{m.role}]\n{m.content}" for m in version.template.messages) + "\n"
-    return _markdown(version)
+        return "\n\n".join(f"[{m.role}]\n{m.content}" for m in template.messages) + "\n"
+    return _markdown(version, template)
 
 
-def prompt_payload(version: PromptVersion) -> dict[str, object]:
-    template = version.template
+def prompt_payload(
+    version: PromptVersion, template: PromptTemplate | None = None
+) -> dict[str, object]:
+    template = template or version.template
     return {
         "version": version.number,
         "parent": version.parent_number,
@@ -40,8 +47,7 @@ def prompt_payload(version: PromptVersion) -> dict[str, object]:
     }
 
 
-def _markdown(version: PromptVersion) -> str:
-    template = version.template
+def _markdown(version: PromptVersion, template: PromptTemplate) -> str:
     lines = [f"# Prompt {version.ref}", ""]
     if version.parent_number:
         lines.append(f"- Parent: v{version.parent_number}")

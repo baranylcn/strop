@@ -7,6 +7,7 @@ from strop.prompts.versions import PromptVersion
 from strop.reporting.prompt_export import PromptFormat, render_prompt
 
 SYSTEM = "Classify.\nUse <strop:fixed>exact labels</strop:fixed>.\n"
+CLEAN_SYSTEM = "Classify.\nUse exact labels.\n"
 TEMPLATE = PromptTemplate(
     (PromptMessage("system", SYSTEM), PromptMessage("user", "Text: {{text}}")),
     frozenset({"system"}),
@@ -14,8 +15,29 @@ TEMPLATE = PromptTemplate(
 VERSION = PromptVersion(3, 1, TEMPLATE, "clarify labels", "run 1", "optimizer", "2026-01-01")
 
 
-def test_yaml_export_loads_back_to_the_same_template() -> None:
-    assert parse_prompt(render_prompt(VERSION, PromptFormat.YAML), ".yaml") == TEMPLATE
+def test_yaml_export_with_markers_loads_back_to_the_same_template() -> None:
+    text = render_prompt(VERSION, PromptFormat.YAML, keep_markers=True)
+    assert parse_prompt(text, ".yaml") == TEMPLATE
+
+
+@pytest.mark.parametrize("fmt", list(PromptFormat))
+def test_exports_have_no_fixed_markers_by_default(fmt: PromptFormat) -> None:
+    text = render_prompt(VERSION, fmt)
+    assert "strop:fixed" not in text
+    assert "exact labels" in text
+
+
+@pytest.mark.parametrize("fmt", list(PromptFormat))
+def test_markers_stay_when_asked(fmt: PromptFormat) -> None:
+    text = render_prompt(VERSION, fmt, keep_markers=True)
+    assert "<strop:fixed>exact labels</strop:fixed>" in text
+
+
+def test_stripped_yaml_keeps_the_editable_roles() -> None:
+    loaded = parse_prompt(render_prompt(VERSION, PromptFormat.YAML), ".yaml")
+    assert loaded.optimize == TEMPLATE.optimize
+    assert "Use exact labels." in loaded.messages[0].content
+    assert "strop:fixed" not in loaded.messages[0].content
 
 
 @pytest.mark.parametrize(
@@ -42,7 +64,7 @@ def test_markdown_contains_every_message_verbatim() -> None:
     assert "- Variables: `{{text}}`" in text
     assert "## system (message 1, editable)" in text
     assert "## user (message 2, frozen)" in text
-    assert SYSTEM.rstrip("\n") in text
+    assert CLEAN_SYSTEM.rstrip("\n") in text
     assert "Text: {{text}}" in text
 
 
@@ -65,4 +87,4 @@ def test_json_export_describes_the_version() -> None:
     assert payload["version"] == 3
     assert payload["variables"] == ["text"]
     assert [m["editable"] for m in payload["messages"]] == [True, False]
-    assert payload["messages"][0]["content"] == SYSTEM
+    assert payload["messages"][0]["content"] == CLEAN_SYSTEM

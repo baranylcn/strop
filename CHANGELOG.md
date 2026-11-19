@@ -7,6 +7,12 @@ commands or the `strop.yaml` format.
 
 ## [Unreleased]
 
+### Changed
+
+- `strop export` no longer writes `<strop:fixed>` markers into the exported prompt, so the file
+  can be pasted straight into an application. The text inside the markers is kept. Pass
+  `--keep-markers` to keep them, for example when you want to optimize the file again.
+
 ## [0.1.2] - 2026-11-19
 
 ### Added

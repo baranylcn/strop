@@ -28,6 +28,10 @@ def export_command(
     write_prompt: Annotated[
         Path | None, typer.Option(help="Also write the prompt as a Strop prompt YAML file here.")
     ] = None,
+    keep_markers: Annotated[
+        bool,
+        typer.Option(help="Keep <strop:fixed> markers in the prompt, to optimize it again."),
+    ] = False,
     force: Annotated[bool, typer.Option(help="Overwrite existing files.")] = False,
     as_json: JsonOption = False,
     directory: DirOption = Path(),
@@ -44,6 +48,7 @@ def export_command(
             include_results=results,
             write_prompt=directory / write_prompt if write_prompt else None,
             force=force,
+            keep_markers=keep_markers,
         )
     if as_json:
         emit_json({"version": result.version.number, "files": [str(p) for p in result.files]})

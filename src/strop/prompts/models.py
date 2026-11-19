@@ -5,7 +5,7 @@ import json
 from dataclasses import dataclass
 
 from strop.llm.types import Role
-from strop.prompts.template import find_variables
+from strop.prompts.template import find_variables, strip_markers
 
 
 @dataclass(frozen=True, slots=True)
@@ -31,6 +31,11 @@ class PromptTemplate:
 
     def is_editable(self, message: PromptMessage) -> bool:
         return message.role in self.optimize
+
+    def without_markers(self) -> "PromptTemplate":
+        """The same template with every ``<strop:fixed>`` marker removed and its text kept."""
+        messages = tuple(PromptMessage(m.role, strip_markers(m.content)) for m in self.messages)
+        return PromptTemplate(messages, self.optimize)
 
     def to_json(self) -> str:
         """Canonical JSON used for storage and hashing."""

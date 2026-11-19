@@ -41,6 +41,7 @@ def export_project(  # noqa: PLR0913
     include_results: bool,
     write_prompt: Path | None,
     force: bool,
+    keep_markers: bool = False,
 ) -> ExportResult:
     """Write the selected prompt, a JSON and Markdown report, and per-example results."""
     prompts = PromptRepository(conn)
@@ -48,14 +49,16 @@ def export_project(  # noqa: PLR0913
     version = resolve_version(prompts, ref)
     report = build_report(project, conn, version)
     targets = {
-        out / f"prompt_{version.ref}.{prompt_format.value}": render_prompt(version, prompt_format),
+        out / f"prompt_{version.ref}.{prompt_format.value}": render_prompt(
+            version, prompt_format, keep_markers=keep_markers
+        ),
         out / "report.json": json.dumps(report, indent=2, ensure_ascii=False) + "\n",
         out / "report.md": render_markdown(report),
     }
     if include_results:
         targets[out / "results.csv"] = _results_csv(conn, version, report)
     if write_prompt is not None:
-        targets[write_prompt] = render_prompt(version, PromptFormat.YAML)
+        targets[write_prompt] = render_prompt(version, PromptFormat.YAML, keep_markers=keep_markers)
     _check_overwrite(list(targets), force)
     for path, text in targets.items():
         path.parent.mkdir(parents=True, exist_ok=True)
