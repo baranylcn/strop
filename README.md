@@ -1,19 +1,36 @@
-# Strop
+<div align="center">
 
-```text
-  ____ _____ ____   ___  ____
- / ___|_   _|  _ \ / _ \|  _ \
- \___ \ | | | |_) | | | | |_) |
-  ___) || | |  _ <| |_| |  __/
- |____/ |_| |_| \_\\___/|_|
-```
+<pre>
+███████╗████████╗██████╗  ██████╗ ██████╗ 
+██╔════╝╚══██╔══╝██╔══██╗██╔═══██╗██╔══██╗
+███████╗   ██║   ██████╔╝██║   ██║██████╔╝
+╚════██║   ██║   ██╔══██╗██║   ██║██╔═══╝ 
+███████║   ██║   ██║  ██║╚██████╔╝██║     
+╚══════╝   ╚═╝   ╚═╝  ╚═╝ ╚═════╝ ╚═╝     
+</pre>
 
-[![PyPI](https://img.shields.io/pypi/v/strop-cli)](https://pypi.org/project/strop-cli/)
-[![Python versions](https://img.shields.io/pypi/pyversions/strop-cli)](https://pypi.org/project/strop-cli/)
-[![CI](https://github.com/baranylcn/strop/actions/workflows/ci.yml/badge.svg)](https://github.com/baranylcn/strop/actions/workflows/ci.yml)
-[![License](https://img.shields.io/pypi/l/strop-cli)](https://github.com/baranylcn/strop/blob/main/LICENSE)
+**Improve LLM prompts by testing them against your own data.**
+
+[![PyPI](https://img.shields.io/pypi/v/strop-cli)](https://pypi.org/project/strop-cli/) [![Python versions](https://img.shields.io/pypi/pyversions/strop-cli)](https://pypi.org/project/strop-cli/) [![CI](https://github.com/baranylcn/strop/actions/workflows/ci.yml/badge.svg)](https://github.com/baranylcn/strop/actions/workflows/ci.yml) [![License](https://img.shields.io/pypi/l/strop-cli)](https://github.com/baranylcn/strop/blob/main/LICENSE)
+
+[Documentation](https://baranylcn.github.io/strop/) | [PyPI](https://pypi.org/project/strop-cli/) | [Changelog](https://github.com/baranylcn/strop/blob/main/CHANGELOG.md)
+
+</div>
 
 Strop is a command-line tool that improves LLM prompts by testing them against your own data. It runs your prompt, scores the outputs with a metric you define, asks a model to revise the prompt based on the failures, and keeps a revision only when the measured results get better.
+
+A shortened example of what `strop optimize` prints. The scores here are illustrative:
+
+```text
+$ strop optimize --max-turns 3
+Turn 1: v1 scores judge:house_style 0.5833.
+  Candidate 1: v2 evaluated on validation
+  Accepted v2 as the new best prompt.
+Turn 2: v2 scores judge:house_style 0.7083.
+  No candidate was accepted; the best prompt is unchanged.
+Run 3: reached the maximum number of turns.
+v1 judge:house_style 0.5833  ->  v2 judge:house_style 0.7083 (validation)
+```
 
 ## Status
 
