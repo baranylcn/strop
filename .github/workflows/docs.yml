@@ -27,7 +27,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
-      - uses: astral-sh/setup-uv@v10.3.3
+      - uses: astral-sh/setup-uv@v10.4.0
       - name: Build the site and fail on any warning
         run: uv run --locked --only-group docs mkdocs build --strict
       - uses: actions/configure-pages@v6
